@@ -1,9 +1,11 @@
+# http://hannahfry.co.uk/2012/02/01/converting-british-national-grid-to-latitude-and-longitude-ii/
 #This code converts british national grid to lat lon
 
-from scipy import *
+#from scipy import *
+from math import sqrt, pi, sin, cos, tan, atan2 as arctan2
 import csv
 
-def OSGB36toWGS84(E,N):
+def gridref2latlng(E, N):
     
     #E, N are the British national grid coordinates - eastings and northings
     a, b = 6377563.396, 6356256.909     #The Airy 180 semi-major and semi-minor axes used for OSGB36 (m)
@@ -81,7 +83,7 @@ def OSGB36toWGS84(E,N):
     lon = arctan2(y_2,x_2)
     H = p/cos(lat) - nu_2
 
-    print [(lat-lat_1)*180/pi, (lon - lon_1)*180/pi]
+    print([(lat-lat_1)*180/pi, (lon - lon_1)*180/pi])
     
     #Convert to degrees
     lat = lat*180/pi
@@ -92,19 +94,24 @@ def OSGB36toWGS84(E,N):
     return lat, lon
 
 
-#Read in from a file
-BNG = csv.reader(open('BNG.csv', 'rU'), delimiter = ',')
-BNG.next()
+def main():
+    #Read in from a file
+    BNG = csv.reader(open('BNG.csv', 'rU'), delimiter = ',')
+    BNG.next()
+    
+    #Get the output file ready
+    outputFile = open('BNGandLatLon.csv', 'wb')
+    output=csv.writer(outputFile,delimiter=',')
+    output.writerow(['Lat', 'Lon', 'E', 'N'])
+    
+    #Loop through the data
+    for E,N in BNG:
+        lat, lon = gridref2latlng(float(E), float(N))
+        output.writerow([str(lat), str(lon), str(E), str(N)])
+    #Close the output file
+    outputFile.close()
+    
+if __name__ == "__main__":
+    main() 
 
-#Get the output file ready
-outputFile = open('BNGandLatLon.csv', 'wb')
-output=csv.writer(outputFile,delimiter=',')
-output.writerow(['Lat', 'Lon', 'E', 'N'])
-
-#Loop through the data
-for E,N in BNG:
-    lat, lon = OSGB36toWGS84(float(E), float(N))
-    output.writerow([str(lat), str(lon), str(E), str(N)])
-#Close the output file
-outputFile.close()
 
