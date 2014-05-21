@@ -1,11 +1,12 @@
 # http://hannahfry.co.uk/2012/02/01/converting-british-national-grid-to-latitude-and-longitude-ii/
+# OSGB36toWGS84.py
 #This code converts british national grid to lat lon
 
 #from scipy import *
 from math import sqrt, pi, sin, cos, tan, atan2 as arctan2
 import csv
 
-def gridref2latlng(E, N):
+def gridref2latlng(E, N, verbose=True):
     
     #E, N are the British national grid coordinates - eastings and northings
     a, b = 6377563.396, 6356256.909     #The Airy 180 semi-major and semi-minor axes used for OSGB36 (m)
@@ -17,7 +18,7 @@ def gridref2latlng(E, N):
     n = (a-b)/(a+b)
 
     #Initialise the iterative variables
-    lat,M = lat0, 0
+    lat, M = lat0, 0
 
     while N-N0-M >= 0.00001: #Accurate to 0.01mm
         lat = (N-N0-M)/(a*F0) + lat;
@@ -48,7 +49,8 @@ def gridref2latlng(E, N):
     #These are on the wrong ellipsoid currently: Airy1830. (Denoted by _1)
     lat_1 = lat - VII*dE**2 + VIII*dE**4 - IX*dE**6
     lon_1 = lon0 + X*dE - XI*dE**3 + XII*dE**5 - XIIA*dE**7
-    print ['firstbash', lat_1*180/pi, lon_1*180/pi]
+    if verbose:
+        print(['firstbash', lat_1*180/pi, lon_1*180/pi])
     #Want to convert to the GRS80 ellipsoid. 
     #First convert to cartesian from spherical polar coordinates
     H = 0 #Third spherical coord. 
@@ -83,7 +85,8 @@ def gridref2latlng(E, N):
     lon = arctan2(y_2,x_2)
     H = p/cos(lat) - nu_2
 
-    print([(lat-lat_1)*180/pi, (lon - lon_1)*180/pi])
+    if verbose:
+        print([(lat-lat_1)*180/pi, (lon - lon_1)*180/pi])
     
     #Convert to degrees
     lat = lat*180/pi
